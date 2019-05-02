@@ -1,3 +1,6 @@
 #!/bin/bash
 
-cd lnd-linux-amd64-v0.6-beta && ./lnd
+cd ${lndpackage} && ./lnd
+cd /
+npm install request
+node lncli-unlock.js ${password}
