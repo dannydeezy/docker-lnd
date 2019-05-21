@@ -56,7 +56,7 @@ const genSeedThenInit = () => {
 }
 
 if (endpoint === 'initwallet') {
-  setTimeout(genSeedThenInit, 3000);
+  setTimeout(genSeedThenInit, 6000);
 } else {
-  setTimeout(makeRequest, 3000);
+  setTimeout(makeRequest, 6000);
 }
