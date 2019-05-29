@@ -1,0 +1,9 @@
+FROM alpine
+
+RUN apk --no-cache add tor
+
+RUN adduser -D -u 1000 toruser
+
+ADD ./torrc /etc/tor/torrc
+
+ENTRYPOINT ["tor"]

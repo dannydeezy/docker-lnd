@@ -12,8 +12,13 @@ const fs = require('fs');
 const request = require('request');
 const passwordFile = '/root/password.txt';
 const mnemonicFile = '/root/mnemonic.txt';
+const urlname = process.argv[2];
+const restport = process.argv[3];
 function convertToBytes(x) {return x.charCodeAt(0);}
 let password, endpoint;
+let unlocked = false;
+let waitBackoff = 6000;
+const timeout = 3000;
 
 if (fs.existsSync(passwordFile)) {
   password = fs.readFileSync(passwordFile).toString();
@@ -30,18 +35,28 @@ const requestBody = {
 
 const getOptions = (endpoint) => {
   return {
-    url: 'https://localhost:8080/v1/' + endpoint,
+    url: 'https://' + urlname + ':' + restport + '/v1/' + endpoint,
     rejectUnauthorized: false,
-    json: true
+    json: true,
+    timeout
   };
 }
 
 const makeRequest = () => {
-  console.log('Attempting to ' + endpoint);
+  if (!unlocked) console.log('Attempting to ' + endpoint + ' at ' + urlname + ':' + restport);
   const options = getOptions(endpoint);
+  if (endpoint === 'initwallet') {
+    endpoint = 'unlockwallet'; // once we init the wallet, all ensuing attempts should be unlock attempts.
+  }
   options.form = JSON.stringify(requestBody);
   request.post(options, function(error, response, body) {
-    console.log(body);
+    if (error && error !== 'Not Found') {
+      console.log(error);
+    } else if (body && !unlocked) {
+      console.log(body);
+      unlocked = true;
+    }
+    setTimeout(makeRequest, waitBackoff);
   });
 }
 
@@ -56,7 +71,8 @@ const genSeedThenInit = () => {
 }
 
 if (endpoint === 'initwallet') {
-  setTimeout(genSeedThenInit, 6000);
+  setTimeout(genSeedThenInit, waitBackoff);
 } else {
-  setTimeout(makeRequest, 6000);
+  setTimeout(makeRequest, waitBackoff);
 }
+
