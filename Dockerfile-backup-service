@@ -1,0 +1,16 @@
+FROM alpine
+
+ENV BACKUP_BUCKET danny-lightning-test
+
+ARG network
+ENV mynetwork $network
+RUN apk --no-cache add inotify-tools py-pip bash
+
+ADD ./copy-channel-backup-on-change.sh /copy-channel-backup-on-change.sh
+
+RUN pip install awscli
+ADD ./aws /.aws
+
+RUN chmod a+x /copy-channel-backup-on-change.sh
+
+ENTRYPOINT /copy-channel-backup-on-change.sh ${mynetwork}

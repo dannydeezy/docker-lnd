@@ -1,0 +1,8 @@
+FROM node:10
+
+ADD ./unlock-or-init.js /unlock-or-init.js
+
+ADD ./unlocker-package.json /package.json
+RUN npm install
+
+ENTRYPOINT node /unlock-or-init.js 0.0.0.0 $LND_REST_PORT
